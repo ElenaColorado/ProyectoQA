@@ -218,3 +218,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Datos procesados
+data/processed/
+
+# Pesos y checkpoints del modelo
+checkpoints/
+models/
+outputs/
+
+# Variables privadas
+.env
+.env.*
