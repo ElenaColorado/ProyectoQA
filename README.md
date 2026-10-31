@@ -82,3 +82,46 @@ The processed datasets are excluded from Git and can be regenerated using the pr
 ## Next Stage
 
 The next team member will fine-tune DistilBERT using the prepared datasets and evaluate its performance.
+
+
+## Using the Preprocessed Dataset (Team Member 2)
+
+The preprocessed SQuAD 2.0 dataset is shared separately as:
+
+`SQuAD2_procesado.zip`
+
+### Instructions
+
+1. Clone the GitHub repository.
+2. Install the dependencies from `requirements.txt`.
+3. Download `SQuAD2_procesado.zip` and save it in your Windows Downloads folder.
+4. Open PowerShell in the root of the project.
+5. Extract the dataset using:
+
+```powershell
+Expand-Archive -Path "$HOME\Downloads\SQuAD2_procesado.zip" -DestinationPath ".\data\processed" -Force
+```
+
+The resulting directory structure must be:
+
+```text
+data/
+  processed/
+    train/
+    validation/
+```
+
+6. Verify the datasets:
+
+```powershell
+python src/data/verify_dataset.py
+```
+
+Expected output:
+
+- Training: 131,754 windows
+- Validation: 12,134 windows
+
+If verification succeeds, the datasets are ready for DistilBERT fine-tuning.
+
+**Note:** Do not upload the processed dataset or model weights to Git. The original SQuAD 2.0 dataset can also be regenerated using `python src/data/build_dataset.py`.
