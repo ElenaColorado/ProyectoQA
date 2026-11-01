@@ -1,0 +1,8 @@
+{
+  "n_calls": 25,
+  "mean_s": 0.126,
+  "p95_s": 0.404,
+  "max_s": 0.439,
+  "projected_50_questions_s": 6.3,
+  "note": "solo inferencia local, SIN tunel/red; el limite global es 150 s"
+}

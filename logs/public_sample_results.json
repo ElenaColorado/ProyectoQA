@@ -1,0 +1,32 @@
+[
+  {
+    "id": "sample-01",
+    "answer": "16",
+    "start": 383,
+    "score": 0.9649503961326248
+  },
+  {
+    "id": "sample-02",
+    "answer": "3.5 days",
+    "start": 437,
+    "score": 0.9821170911895067
+  },
+  {
+    "id": "sample-03",
+    "answer": null,
+    "start": null,
+    "score": 0.6808429731612875
+  },
+  {
+    "id": "sample-04",
+    "answer": "3",
+    "start": 310,
+    "score": 0.7553223510802674
+  },
+  {
+    "id": "sample-05",
+    "answer": "50,257",
+    "start": 3157,
+    "score": 0.9999878057717463
+  }
+]

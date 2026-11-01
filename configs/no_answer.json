@@ -1,0 +1,10 @@
+{
+  "threshold": 1.0,
+  "criterion": "valor elegido dentro de la meseta del F1 ponderado 75/25 (HasAns/NoAns), entre 0.5 y 2.5; lado conservador que mantiene NoAns F1 > 55",
+  "threshold_max_f1_validation_50_50": -1.0,
+  "threshold_max_weighted_f1": 2.5,
+  "weighted_f1": 69.04,
+  "n_validation_examples": 2000,
+  "seed": 42,
+  "rule": "null if (null_score - best_span_score) > threshold"
+}
