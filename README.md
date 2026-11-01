@@ -75,13 +75,13 @@ The processed datasets are excluded from Git and can be regenerated using the pr
 - [x] Long contexts supported through sliding windows
 - [x] Training and validation features generated
 - [x] Structural validation completed
-- [ ] Model fine-tuning
+- [x] Model fine-tuning (DistilBERT on SQuAD 2.0 completed)
 - [ ] Inference and no-answer calibration
 - [ ] API implementation and deployment
 
 ## Next Stage
 
-The next team member will fine-tune DistilBERT using the prepared datasets and evaluate its performance.
+The next team member (Member 3) will implement the inference pipeline, answer extraction logic, and calibrate the no-answer (null) threshold using the fine-tuned model weights.
 
 
 ## Using the Preprocessed Dataset (Team Member 2)
@@ -125,3 +125,24 @@ Expected output:
 If verification succeeds, the datasets are ready for DistilBERT fine-tuning.
 
 **Note:** Do not upload the processed dataset or model weights to Git. The original SQuAD 2.0 dataset can also be regenerated using `python src/data/build_dataset.py`.
+
+
+## Using the Fine-Tuned Model (Team Member 3)
+
+The fine-tuned model weights and tokenizer are exported to models/qa-final/ (excluded from Git).
+
+### Instructions for Member 3
+
+1. Transfer the models/qa-final/ directory via shared cloud storage into your local ProyectoQA/models/qa-final/.
+2. Run unit tests to verify your environment and offline model loading:
+`powershell
+pytest tests/test_training.py -v
+`
+3. Load the model and tokenizer offline:
+`python
+from transformers import AutoModelForQuestionAnswering, AutoTokenizer
+
+model = AutoModelForQuestionAnswering.from_pretrained('models/qa-final', local_files_only=True)
+tokenizer = AutoTokenizer.from_pretrained('models/qa-final', local_files_only=True)
+`
+Refer to HANDOFF_INTEGRANTE_2.md for complete handover metrics, hyperparameters, and instructions.

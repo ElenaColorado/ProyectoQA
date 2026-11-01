@@ -1,0 +1,13 @@
+{
+  "model_name": "distilbert/distilbert-base-uncased",
+  "train_samples": 131754,
+  "eval_samples": 12134,
+  "epochs": 2,
+  "batch_size": 8,
+  "learning_rate": 3e-05,
+  "device": "cuda",
+  "train_loss": 1.2073591011107583,
+  "eval_loss": 1.2618788480758667,
+  "total_flos": 1.8310275100159224e+16,
+  "train_runtime_seconds": 3434.7341
+}
