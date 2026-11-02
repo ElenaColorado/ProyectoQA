@@ -144,22 +144,35 @@ If verification succeeds, the datasets are ready for DistilBERT fine-tuning.
 **Note:** Do not upload the processed dataset or model weights to Git. The original SQuAD 2.0 dataset can also be regenerated using `python src/data/build_dataset.py`.
 
 
+
 ## Using the Fine-Tuned Model (Team Member 3)
 
-The fine-tuned model weights and tokenizer are exported to models/qa-final/ (excluded from Git).
+The fine-tuned model weights and tokenizer are exported to `models/qa-final/` (excluded from Git).
 
 ### Instructions for Member 3
 
-1. Transfer the models/qa-final/ directory via shared cloud storage into your local ProyectoQA/models/qa-final/.
+1. Transfer the `models/qa-final/` directory via shared cloud storage into your local `ProyectoQA/models/qa-final/`.
+
 2. Run unit tests to verify your environment and offline model loading:
-`powershell
+
+```powershell
 pytest tests/test_training.py -v
-`
+```
+
 3. Load the model and tokenizer offline:
-`python
+
+```python
 from transformers import AutoModelForQuestionAnswering, AutoTokenizer
 
-model = AutoModelForQuestionAnswering.from_pretrained('models/qa-final', local_files_only=True)
-tokenizer = AutoTokenizer.from_pretrained('models/qa-final', local_files_only=True)
-`
-Refer to HANDOFF_INTEGRANTE_2.md for complete handover metrics, hyperparameters, and instructions.
+model = AutoModelForQuestionAnswering.from_pretrained(
+    'models/qa-final',
+    local_files_only=True
+)
+
+tokenizer = AutoTokenizer.from_pretrained(
+    'models/qa-final',
+    local_files_only=True
+)
+```
+
+Refer to `HANDOFF_INTEGRANTE_2.md` for complete handover metrics, hyperparameters, and instructions.
