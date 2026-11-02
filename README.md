@@ -176,3 +176,20 @@ tokenizer = AutoTokenizer.from_pretrained(
 ```
 
 Refer to `HANDOFF_INTEGRANTE_2.md` for complete handover metrics, hyperparameters, and instructions.
+
+
+## Model Weights Download
+
+The fine-tuned DistilBERT model weights are stored separately from the Git repository, as required by the project guidelines.
+
+**Model archive:** `qa-final.zip`
+
+**Download link (OneDrive):**
+
+[Download Fine-Tuned DistilBERT Model](https://institutekey-my.sharepoint.com/:f:/g/personal/elena_colorado_keyinstitute_edu_sv/IgBzyVcWulakSKI_EE5rTneYASjRTEdyyqUzlnRpXp4elZA?e=sjGs7S)
+
+The archive contains the fine-tuned model weights, model configuration, and tokenizer files.
+
+To run the service locally, download and extract the model files into the directory expected by the application.
+
+Model weights are excluded from Git to preserve a lightweight repository and comply with the submission requirements.
