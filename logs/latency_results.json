@@ -1,0 +1,45 @@
+{
+  "target": "oblivious-latitude-luckless.ngrok-free.dev",
+  "n_requests": 50,
+  "failures_or_timeouts": 0,
+  "mean_s": 0.361,
+  "p95_s": 0.738,
+  "max_s": 0.809,
+  "total_s": 18.04,
+  "projected_50_questions_s": 18.0,
+  "limit_per_request_s": 5.0,
+  "limit_global_s": 150.0,
+  "within_limits": true,
+  "first_round": [
+    {
+      "id": "sample-01",
+      "answer": "16",
+      "start": 383,
+      "seconds": 0.317
+    },
+    {
+      "id": "sample-02",
+      "answer": "3.5 days",
+      "start": 437,
+      "seconds": 0.288
+    },
+    {
+      "id": "sample-03",
+      "answer": null,
+      "start": null,
+      "seconds": 0.276
+    },
+    {
+      "id": "sample-04",
+      "answer": "3",
+      "start": 310,
+      "seconds": 0.279
+    },
+    {
+      "id": "sample-05",
+      "answer": "50,257",
+      "start": 3157,
+      "seconds": 0.809
+    }
+  ]
+}
