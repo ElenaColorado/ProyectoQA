@@ -5,7 +5,7 @@
 | Field | Value |
 |---|---|
 | Team id | `team-02` |
-| Members | Elena Colorado (Member 1), Integrante 2 (Member 2), Emilio Martinez, Juan Pablo Quintanilla (Member 4) |
+| Members | Elena Colorado (Member 1), David Aguilar (Member 2), Emilio Martinez (Member 3), Juan Pablo Quintanilla (Member 4) |
 | Repository URL | https://github.com/ElenaColorado/ProyectoQA |
 | `submission` commit hash | Tag `submission` (run `git rev-parse submission`; the SHA is also sent to the instructor with the link) |
 | Public service URL used at the dry run | https://oblivious-latitude-luckless.ngrok-free.dev (ngrok; backup: Cloudflare Quick Tunnel, whose URL changes on every restart) |
