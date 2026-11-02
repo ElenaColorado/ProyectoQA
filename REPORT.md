@@ -5,11 +5,11 @@
 | Field | Value |
 |---|---|
 | Team id | `team-02` |
-| Members | Elena Colorado (Member 1), Integrante 2 (Member 2), Emilio Martinez, Integrante 4 (Member 4) |
+| Members | Elena Colorado (Member 1), Integrante 2 (Member 2), Emilio Martinez, Juan Pablo Quintanilla (Member 4) |
 | Repository URL | https://github.com/ElenaColorado/ProyectoQA |
-| `submission` commit hash | *To be filled by Member 4 upon final submission tag* |
-| Public service URL used at the dry run | *To be filled by Member 4* |
-| AI tools used (which, and for what) | Antigravity AI Assistant (code generation, debugging, and documentation) Claude (Anthropic): drafted and debugged the Member 3 code (src/inference/, src/evaluation/, tests/test_inference.py); Member 3 ran, tested and reviewed it.|
+| `submission` commit hash | Tag `submission` (run `git rev-parse submission`; the SHA is also sent to the instructor with the link) |
+| Public service URL used at the dry run | https://oblivious-latitude-luckless.ngrok-free.dev (ngrok; backup: Cloudflare Quick Tunnel, whose URL changes on every restart) |
+| AI tools used (which, and for what) | Antigravity AI Assistant (code generation, debugging, and documentation) Claude (Anthropic): drafted and debugged the Member 3 code (src/inference/, src/evaluation/, tests/test_inference.py); Member 3 ran, tested and reviewed it. Claude (Anthropic) also helped Member 4 draft `app.py`, its tests and the latency script, and with troubleshooting; Member 4 ran and checked them on his own laptop. |
 
 ## 1. Model choice and justification
 
@@ -55,19 +55,20 @@ Held-out check. On 1,000 other validation examples (not used for the sweep) with
 Too low or too high. At -2.0 the model says null too often: HasAns F1 drops to 56.09 while NoAns F1 rises to 77.38. At 3.5 it answers almost everything: HasAns F1 rises to 79.45 but NoAns F1 falls to 34.48, which means it invents answers for impossible questions.
 ## 4. Serving architecture
 
-*(To be completed by Member 4 — FastAPI and Deployment)*
+- **Framework and server:** FastAPI served by Uvicorn, 1 worker, port 8000 (`app.py`).
+- **Model loading:** once, when the process starts (FastAPI lifespan, in a background thread). `QAPredictor` (Member 3) loads the tokenizer and weights from `models/qa-final/` with `local_files_only=True`, then one warm-up prediction runs. Until then `GET /health` returns 503 `{"status":"loading"}`; afterwards 200 `{"status":"ok"}`. The `params` value of `/info` is computed from the loaded model.
+- **Request flow:** the `POST /predict` body is validated by a Pydantic model (strict strings, `id` 1–64, `context` 1–5000, `question` 1–500 characters, extra fields forbidden), then the token is checked, then `predict(context, question)` runs. Long contexts are split into 384-token windows with stride 128; the best span over all windows is compared with the null score using threshold 1.0 (Section 3). Before returning 200, `app.py` checks that `context[start:start+len(answer)] == answer`, that `start` is `null` only when `answer` is `null`, and that `score` is in [0,1]; otherwise it returns 500 `internal_error` instead of hiding the bug. The request `id` is echoed unchanged. A lock allows one inference at a time.
+- **Access control:** `/info` and `/predict` use a dependency that compares the whole `Authorization` header with `Bearer <QA_API_TOKEN>` (`hmac.compare_digest`, case-sensitive). The token comes from the `QA_API_TOKEN` environment variable; the app refuses to start without it, and it is never in the code or the repository. A wrong or missing token gives 401 `{"error":"unauthorized"}`. Invalid bodies give 400 `{"error":"bad_request","detail":...}` through a custom handler (not FastAPI's default format).
+- **Tunnel:** ngrok, `ngrok http 127.0.0.1:8000`. Backup: `cloudflared tunnel --url http://localhost:8000`. The five checks of the guide were run through the public HTTPS URL and are saved in `logs/tunnel_checks.txt` (no secrets); latency through the tunnel is in `logs/latency_results.json`.
+- **How to run** from a clean machine:
 
-- **Framework and server** (e.g. FastAPI + uvicorn), number of workers.
-- **Model loading:** when and where the model is loaded.
-- **Request flow:** from the incoming `/predict` request to the returned span, including how long contexts are handled.
-- **Access control:** where the token is checked and where the token value comes from.
-- **Tunnel:** which tool you use and the command you run.
-- **How to run** from a clean machine (commands and environment variables):
-
-```bash
-pip install -r requirements.txt
-export QA_API_TOKEN=...
-uvicorn app:app --host 0.0.0.0 --port 8000
+```powershell
+python -m pip install -r requirements.txt
+# put the model files in models/qa-final/ (shared folder, not in Git)
+$env:QA_API_TOKEN = "<token from the instructor>"
+$env:QA_TEAM_ID = "team-02"
+python -m uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1
+ngrok http 127.0.0.1:8000
 ```
 
 ## 5. Results on the public sample set
@@ -88,8 +89,8 @@ sample-04 failed. The question asks how much LoRA reduces GPU memory when fine-t
 |---|---|
 | Parameters | 66,364,418 |
 | Size on disk | 253.17 MB (`models/qa-final/model.safetensors`) |
-| Mean latency per `/predict` request on your laptop (CPU) | *(To be measured by Member 3/4 on target CPU)* |
-| Laptop CPU and RAM | Intel Core i5 / AMD Ryzen, 16 GB RAM |
+| Mean latency per `/predict` request on your laptop (CPU) | 0.361 s through the ngrok tunnel (50 requests, 0 failures, p95 0.738 s, max 0.809 s, 18.04 s in total; `logs/latency_results.json`); 0.126 s for the model alone without network (Member 3, 25 calls, `logs/cpu_latency.json`) |
+| Laptop CPU and RAM | Intel Core i7-9750H @ 2.60 GHz (6 cores, 12 threads), 15.8 GB RAM |
 
 ## 7. Problems encountered and how you fixed them
 
@@ -104,13 +105,21 @@ At least two concrete problems. For each: what happened, the cause, the fix, and
    **Cause:** 384 tokens with attention matrices and forward/backward activations exceeded the 4 GB VRAM limit at batch size 16.  
    **Fix:** Reduced per-device batch size to 8 and configured `gradient_accumulation_steps=2`, simulating an effective batch size of 16 without increasing peak VRAM footprint, along with FP16 mixed precision.  
    **Commit:** `[Stage 2 commit]`
+
+3. **Problem:** running the whole test suite (`python -m pytest -q`) made 5 tests of `tests/test_public_sample.py` fail, with answers such as `'2018.'` or `'3'` and a constant score of 0.9, while the same file passed 9 of 10 tests when run alone.
+   **Cause:** `tests/test_api_contract.py` set `QA_USE_MOCK=1` with `os.environ.update(...)`, and that value stayed in the environment for the rest of the pytest process. When the public-sample tests started the API, it loaded the fake development predictor instead of the real model.
+   **Fix:** the fixture now uses `pytest.MonkeyPatch` and restores the environment when its tests finish. After the fix the full suite shows only the known `sample-04` case (Section 5).
+   **Commit:** `ae25c63`
+
 ## 8. Decoder investigation
 
-*(To be completed by Member 3 / Team)*
+Problem 1: false answer when the question names an entity the text does not support (sample-04). Our encoder scores spans by how well they match the question but has no step that checks every detail of the question against the text. A decoder-only or encoder-decoder model (GPT-style, T5-style) can read the whole question and the context and then generate "the text does not say this for BERT-base", which handles this kind of near-miss better. The cost is high: generation is token by token, so latency grows with answer length, and a model that does this reliably is much larger than our 66M-parameter DistilBERT (T5-base alone has about 220M, roughly 3 times more). On a CPU laptop with a limit of about 3 seconds per question, this is a serious risk.
 
-How could a decoder (GPT-style) or an encoder–decoder architecture address specific problems **your team** encountered (Section 7 or Section 5)? Examples: answers that are not a contiguous span, yes/no questions, long contexts.
+Problem 2: the threshold trade-off (NoAns F1 55.36 vs HasAns F1 70.13 on held-out data). With one score gap we must trade answering against abstaining. A generative model could abstain from an explicit reading of the question, but it would also be more likely to invent a fluent answer that is not in the text.
 
-For each point: the problem, how the alternative architecture would handle it, and what it would cost (latency, model size, evaluation).
+Evaluation cost. The API contract requires context[start:start+len(answer)] == answer. Our extractive model satisfies this by construction. A generated answer can paraphrase, so it would need extra alignment against the context, and some answers would fail the contract even when they are semantically right. Evaluation with EM/F1 would also be less predictable.
+
+Conclusion. For this contract (exact span, start offset, about 3 s per question on CPU), the extractive encoder is the better fit. A decoder would help most for answers that are not a contiguous span or for yes/no questions, which our system does not handle (see Section 9).
 
 ## 9. Known limitations
 
