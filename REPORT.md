@@ -38,7 +38,7 @@
   - Pilot training (20k subset) eval loss: 1.7067
   - Full training (131,754 windows) eval loss: **1.2619** (optimal checkpoint selected at step 8,235 with eval loss 1.2613)
   - Train loss final: **1.2074** (gap with eval loss is 0.0545, confirming healthy convergence without overfitting)
-  - Exact Match (EM) and F1 validation: *To be measured in detail on answerable and unanswerable subsets by Member 3 during inference calibration*.
+  - Exact Match (EM) and F1 validation: 1,000 held-out SQuAD 2.0 validation examples: EM 59.0, F1 63.25 (HasAns F1 70.13, NoAns F1 55.36). Source: `logs/inference_validation_metrics.json`.
 
 ## 3. No-answer threshold
 Decision rule. Each question/context pair is split into windows (384 tokens, stride 128). For every window the model gives start and end logits. We compare two scores:
@@ -99,12 +99,12 @@ At least two concrete problems. For each: what happened, the cause, the fix, and
 1. **Problem:** `Trainer.__init__()` raised `TypeError: Trainer.__init__() got an unexpected keyword argument 'tokenizer'`.  
    **Cause:** Upgraded `transformers==5.2.0` deprecated the `tokenizer` parameter in favor of `processing_class`.  
    **Fix:** Added adaptive instantiation in `src/training/train.py` checking for `processing_class` support first with a fallback to `tokenizer` for compatibility across transformer versions.  
-   **Commit:** `[Stage 2 commit]`
+   **Commit:** `f995d6b`
 
 2. **Problem:** CUDA Out-Of-Memory (OOM) error on laptop NVIDIA RTX 3050 (4 GB VRAM) when attempting batch size 16 with sequence length 384.  
    **Cause:** 384 tokens with attention matrices and forward/backward activations exceeded the 4 GB VRAM limit at batch size 16.  
    **Fix:** Reduced per-device batch size to 8 and configured `gradient_accumulation_steps=2`, simulating an effective batch size of 16 without increasing peak VRAM footprint, along with FP16 mixed precision.  
-   **Commit:** `[Stage 2 commit]`
+   **Commit:** `f995d6b`
 
 3. **Problem:** running the whole test suite (`python -m pytest -q`) made 5 tests of `tests/test_public_sample.py` fail, with answers such as `'2018.'` or `'3'` and a constant score of 0.9, while the same file passed 9 of 10 tests when run alone.
    **Cause:** `tests/test_api_contract.py` set `QA_USE_MOCK=1` with `os.environ.update(...)`, and that value stayed in the environment for the rest of the pytest process. When the public-sample tests started the API, it loaded the fake development predictor instead of the real model.
@@ -123,7 +123,11 @@ Conclusion. For this contract (exact span, start offset, about 3 s per question 
 
 ## 9. Known limitations
 
-*(To be completed by Team)*
+The service is extractive only: it returns a span copied from the given context or null, and it cannot synthesize, summarize or combine information across passages.
 
-What your service does **not** do or handle, and what would happen if it received such input.
+- Impossible questions: NoAns F1 is only 55.36 on held-out data, so the model sometimes answers questions the text does not support. On public sample-04 (an impossible question) it returns "3" with score 0.755 instead of null. We did not tune the threshold (1.0) to fix this single case, to avoid overfitting to five examples.
+- Language and size: English only. Requests with context over 5000 characters, question over 500 characters, or id over 64 characters are rejected with a 400/422 error in the contract format.
+- Concurrency: one worker and one lock, so inferences run one at a time. Under heavy parallel load requests would queue and could exceed the 5 s limit.
+- Score: the 0..1 score is a heuristic confidence, not a calibrated probability.
+- Availability: inference runs on one laptop (CPU) behind a public tunnel; if the laptop sleeps, loses network or the tunnel restarts, the service is unavailable and the free ngrok URL may change.
 
