@@ -1,0 +1,6 @@
+Tunnel checks - 2026-11-01T18:52:11 - https://oblivious-latitude-luckless.ngrok-free.dev
+1 GET /health (sin token) -> HTTP 200  {"status":"ok"}
+2 GET /info (sin token) -> HTTP 401  {"error":"unauthorized","detail":"missing or invalid token"}
+3 GET /info (Bearer incorrecto) -> HTTP 401  {"error":"unauthorized","detail":"missing or invalid token"}
+4 GET /info (Bearer correcto) -> HTTP 200  {"team":"team-02","model":"distilbert/distilbert-base-uncased","params":66364418,"max_seq_length":384,"doc_stride":128}
+5 POST /predict (Bearer correcto) -> HTTP 200  {"id":"sample-01","answer":"16","start":383,"score":0.9649503638782683}
