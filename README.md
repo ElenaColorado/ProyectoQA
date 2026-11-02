@@ -75,13 +75,30 @@ The processed datasets are excluded from Git and can be regenerated using the pr
 - [x] Long contexts supported through sliding windows
 - [x] Training and validation features generated
 - [x] Structural validation completed
-- [x] Model fine-tuning (DistilBERT on SQuAD 2.0 completed)
-- [ ] Inference and no-answer calibration
-- [ ] API implementation and deployment
+- [x] Model fine-tuning completed (DistilBERT on SQuAD 2.0)
+- [x] Inference and no-answer threshold calibration completed
+- [x] FastAPI implementation and Bearer token authentication completed
+- [x] Public HTTPS tunnel tested using ngrok
+- [x] API endpoints tested (/health, /info, /predict)
+- [x] Public sample evaluation completed (4/5 correct)
+- [x] Dry Run evidence documented
+- [x] Final report prepared
 
-## Next Stage
+## Final Verification and Submission
 
-The next team member (Member 3) will implement the inference pipeline, answer extraction logic, and calibrate the no-answer (null) threshold using the fine-tuned model weights.
+All four team members have completed their assigned implementation stages.
+
+The service uses a fine-tuned DistilBERT model for extractive question answering, with support for unanswerable questions and long contexts.
+
+The API is implemented using FastAPI and exposes three endpoints: /health, /info, and /predict. Access-controlled endpoints require a Bearer token provided through the QA_API_TOKEN environment variable.
+
+The service was tested through an HTTPS ngrok tunnel. The public sample evaluation achieved 4 correct responses out of 5, with the remaining failure documented in REPORT.md.
+
+Dry Run screenshots, commands, and explanations are available in evidence/dry_run/.
+
+The model weights are stored separately from Git and must be available on the serving laptop.
+
+The submission version is identified using the Git tag `submission`.
 
 
 ## Using the Preprocessed Dataset (Team Member 2)
