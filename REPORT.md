@@ -71,17 +71,23 @@ python -m uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1
 ngrok http 127.0.0.1:8000
 ```
 
+
 ## 5. Results on the public sample set
 
-Item	   | Expected|	Your answer|	start |	Correct?
-sample-01|	16	   |   16	       |  383	  | Yes
-sample-02| 3.5 days|	3.5 days	 |  437	  | Yes
-sample-03| null	   |   null	     |  null	| Yes
-sample-04| null	   |    3	       |  310	  | No
-sample-05| 50,257  |	50,257	   |  3157	| Yes
-4 of 5 correct. The start values match the reference offsets, and sample-05 (answer near the end of a context longer than 512 tokens) is found, so the sliding windows and offset mapping work.
+| Item | Expected | Your answer | start | Correct? |
+|---|---|---|---|---|
+| sample-01 | 16 | 16 | 383 | Yes |
+| sample-02 | 3.5 days | 3.5 days | 437 | Yes |
+| sample-03 | null | null | null | Yes |
+| sample-04 | null | 3 | 310 | No |
+| sample-05 | 50,257 | 50,257 | 3157 | Yes |
 
-sample-04 failed. The question asks how much LoRA reduces GPU memory when fine-tuning BERT-base, but the context only reports that figure for GPT-3 175B. The model extracted "3" (character 310), the memory-reduction figure in that sentence. We did not run an ablation, but a likely explanation is that the wording of the question matches that sentence and nothing in an extractive encoder checks that the model named in the question (BERT-base) is the one in the text (GPT-3 175B). From the returned score (0.755) we infer that its null-minus-best-span gap was about -0.13 (this value is derived, it is not stored in the log), so it would only turn into null with a threshold below about -0.13. A threshold of -0.25 would have fixed this case, but according to our sweep it would cost about 1.6 points of weighted F1 on validation (69.04 to 67.39), so we kept 1.0 instead of overfitting to one public sample.
+**4 of 5 correct.** The start values match the reference offsets, and sample-05 (answer near the end of a context longer than 512 tokens) is found, so the sliding windows and offset mapping work.
+
+**Sample-04 failure analysis:** The question asks how much LoRA reduces GPU memory when fine-tuning BERT-base, but the context only reports that figure for GPT-3 175B. The model extracted "3" (character 310), the memory-reduction figure in that sentence. We did not run an ablation, but a likely explanation is that the wording of the question matches that sentence and nothing in an extractive encoder checks that the model named in the question (BERT-base) is the one in the text (GPT-3 175B).
+
+From the returned score (0.755) we infer that its null-minus-best-span gap was about -0.13 (this value is derived, it is not stored in the log), so it would only turn into null with a threshold below about -0.13. A threshold of -0.25 would have fixed this case, but according to our sweep it would cost about 1.6 points of weighted F1 on validation (69.04 to 67.39), so we kept 1.0 instead of overfitting to one public sample.
+
 
 ## 6. Model size and latency (not graded)
 
